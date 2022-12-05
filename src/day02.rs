@@ -1,25 +1,3 @@
-use std::time::Instant;
-
-// pub fn compute(s: &str) -> (usize, usize) {
-//   let start = Instant::now();
-//   let score1 = scores3(s);
-//   let score2 = scores4(s);
-//   let start2 = Instant::now();
-//   let score = scores(s);
-//   let start3 = Instant::now();
-//   let score3 = (scores1(s), scores2(s));
-//   let stop = Instant::now();
-//   println!(
-//     "{:?}, {:?}, {:?}",
-//     start2 - start,
-//     start3 - start2,
-//     stop - start3
-//   );
-//   println!("({score1}, {score2}), {score:?}, {score3:?}");
-//   score
-//   // (12679, 14470)
-// }
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 enum Outcome {
@@ -112,8 +90,7 @@ impl From<u8> for RockPaperScissors {
 pub fn compute(s: &str) -> (usize, usize) {
   let mut score1 = 0;
   let mut score2 = 0;
-  for line in s.lines() {
-    let chars = line.as_bytes();
+  for chars in s.as_bytes().chunks_exact(4) {
     let opponent = RockPaperScissors::from(chars[0]);
     let choose = RockPaperScissors::from(chars[2]);
     let outcome = choose.outcome(opponent);
@@ -123,78 +100,4 @@ pub fn compute(s: &str) -> (usize, usize) {
     score2 += outcome.points() + choose.points();
   }
   (score1, score2)
-}
-
-fn scores3(s: &str) -> usize {
-  let mut score = 0;
-  for line in s.lines() {
-    let chars = line.as_bytes();
-    let opponent = RockPaperScissors::from(chars[0]);
-    let choose = RockPaperScissors::from(chars[2]);
-    let outcome = choose.outcome(opponent);
-    score += outcome.points() + choose.points();
-  }
-  score
-}
-
-fn scores4(s: &str) -> usize {
-  let mut score = 0;
-  for line in s.lines() {
-    let chars = line.as_bytes();
-    let opponent = RockPaperScissors::from(chars[0]);
-    let outcome = Outcome::from(chars[2]);
-    let choose = opponent.choose(outcome);
-    score += outcome.points() + choose.points();
-  }
-  score
-}
-
-fn scores1(s: &str) -> usize {
-  let mut score = 0;
-  for line in s.lines() {
-    let chars = line.as_bytes();
-    let opponent = chars[0];
-    let choose = chars[2];
-    let win = if choose - b'X' == opponent - b'A' {
-      3
-    } else if (choose == b'X' && opponent == b'B')
-      || (choose == b'Y' && opponent == b'C')
-      || (choose == b'Z' && opponent == b'A')
-    {
-      0
-    } else {
-      6
-    };
-    score += win + (choose - b'W') as usize;
-  }
-  score
-}
-
-fn scores2(s: &str) -> usize {
-  let mut score = 0;
-  for line in s.lines() {
-    let chars = line.as_bytes();
-    let opponent = chars[0];
-    let outcome = chars[2];
-    let win = outcome - b'X';
-    let choose = if win == 1 {
-      opponent - b'A' + b'X'
-    } else if win == 2 {
-      match opponent {
-        b'A' => b'Y',
-        b'B' => b'Z',
-        b'C' => b'X',
-        _ => unreachable!(),
-      }
-    } else {
-      match opponent {
-        b'A' => b'Z',
-        b'B' => b'X',
-        b'C' => b'Y',
-        _ => unreachable!(),
-      }
-    };
-    score += (win as usize * 3) + (choose - b'W') as usize;
-  }
-  score
 }

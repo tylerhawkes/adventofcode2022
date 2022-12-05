@@ -1,5 +1,5 @@
-pub fn compute(input: &str) -> (usize, usize) {
-  let mut calories = calories(input);
+pub fn compute(s: &str) -> (usize, usize) {
+  let mut calories = calories(s);
   calories.sort_by_key(|u| std::cmp::Reverse(*u));
 
   (calories[0], calories[..3].iter().copied().sum())

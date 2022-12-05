@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-pub fn compute(s: &str) -> (usize, usize) {
+pub fn compute(s: &str) -> (String, String) {
   let mut lines = s.lines();
   let mut stacks = parse_stacks(&mut lines);
   let mut stacks2 = stacks.clone();
@@ -24,14 +24,11 @@ pub fn compute(s: &str) -> (usize, usize) {
     .iter()
     .map(|s| s.last().copied().unwrap_or(' '))
     .collect::<String>();
-  println!("{arrangement}");
   let arrangement2 = stacks2
     .iter()
     .map(|s| s.last().copied().unwrap_or(' '))
     .collect::<String>();
-  println!("{arrangement2}");
-  // Not FWDFHVZWJ
-  (0, 0)
+  (arrangement, arrangement2)
 }
 
 fn parse_stacks<'a, I: Iterator<Item = &'a str>>(i: &mut I) -> Vec<Vec<char>> {
