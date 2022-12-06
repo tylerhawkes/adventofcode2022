@@ -1,5 +1,5 @@
 #![allow(unused)]
-use std::fmt::Display;
+use std::{fmt::Display, time::Instant};
 
 mod day01;
 mod day02;
@@ -40,6 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       .map(|a| a.parse())
       .collect::<Result<Vec<_>, _>>()?
   };
+  let start = Instant::now();
   for day in days {
     match day {
       1 => print_result(day01::compute(include_str!("../input/day01.txt"))),
@@ -70,6 +71,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       _ => return Err("Invalid day".into()),
     }
   }
+  let end = Instant::now();
+  println!("elapsed: {:?}", end - start);
   Ok(())
 }
 
