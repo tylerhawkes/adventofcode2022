@@ -1,52 +1,52 @@
+use rayon::prelude::*;
 use std::{collections::HashSet, str::FromStr};
 
 pub fn compute(s: &str) -> (usize, usize) {
   let cubes = s.parse::<Cubes>().unwrap();
-  let mut faces = 0;
-  for cube in cubes.cubes.iter().copied() {
-    faces += cube
-      .neighbors()
-      .into_iter()
-      .filter(|n| !cubes.cubes.contains(n))
-      .count();
-  }
-  let mut outside_faces = 0;
-  let mut inside_cubes = HashSet::with_capacity(2000);
+  let faces = cubes
+    .cubes
+    .par_iter()
+    .map(|cube| {
+      cube
+        .neighbors()
+        .into_iter()
+        .filter(|n| !cubes.cubes.contains(n))
+        .count()
+    })
+    .sum();
+
   let min = cubes.min_coord;
   let max = cubes.max_coord;
-  for x in min.x..=max.x {
-    for y in min.y..=max.y {
-      for z in min.z..=max.z {
-        let c = Coord3D { x, y, z };
-        let path = pathfinding::directed::bfs::bfs(
-          &c,
-          |c| {
-            c.neighbors()
-              .into_iter()
-              .filter(|n| !cubes.cubes.contains(n))
-          },
-          |c| {
-            c.x <= min.x
-              || c.x >= max.x
-              || c.y <= min.y
-              || c.y >= max.y
-              || c.z <= min.z
-              || c.z >= max.z
-          },
-        );
-        if path.is_none() {
-          inside_cubes.insert(c);
-        }
-      }
-    }
-  }
-  for cube in cubes.cubes.iter().copied() {
-    outside_faces += cube
-      .neighbors()
-      .into_iter()
-      .filter(|n| !cubes.cubes.contains(n) && !inside_cubes.contains(n))
-      .count();
-  }
+  let outside_faces = cubes
+    .cubes
+    .par_iter()
+    .map(|cube| {
+      cube
+        .neighbors()
+        .into_iter()
+        .filter(|c| {
+          !cubes.cubes.contains(c)
+            && pathfinding::directed::bfs::bfs(
+              c,
+              |c| {
+                c.neighbors()
+                  .into_iter()
+                  .filter(|n| !cubes.cubes.contains(n))
+              },
+              |c| {
+                c.x <= min.x
+                  || c.x >= max.x
+                  || c.y <= min.y
+                  || c.y >= max.y
+                  || c.z <= min.z
+                  || c.z >= max.z
+              },
+            )
+            .is_some()
+        })
+        .count()
+    })
+    .sum();
   (faces, outside_faces)
 }
 
@@ -68,20 +68,6 @@ impl Coord3D {
       self.diff_z(1),
     ]
   }
-  // fn outside_faces(
-  //   self,
-  //   min_coord: Coord3D,
-  //   max_coord: Coord3D,
-  // ) -> [Box<dyn Iterator<Item = Self>>; 6] {
-  //   [
-  //     Box::new((min_coord.x..self.x).rev().map(move |o| self.diff_x(o))),
-  //     Box::new((self.x + 1..=max_coord.x).map(move |o| self.diff_x(o))),
-  //     Box::new((min_coord.y..self.y).rev().map(move |o| self.diff_y(o))),
-  //     Box::new((self.y + 1..=max_coord.y).map(move |o| self.diff_y(o))),
-  //     Box::new((min_coord.z..self.z).rev().map(move |o| self.diff_z(o))),
-  //     Box::new((self.z + 1..=max_coord.z).map(move |o| self.diff_z(o))),
-  //   ]
-  // }
   fn diff_x(self, diff: i16) -> Self {
     Self {
       x: self.x + diff,
@@ -166,23 +152,4 @@ impl FromStr for Cubes {
       max_coord,
     })
   }
-}
-
-#[test]
-fn test_18() {
-  let input = "2,2,2
-1,2,2
-3,2,2
-2,1,2
-2,3,2
-2,2,1
-2,2,3
-2,2,4
-2,2,6
-1,2,5
-3,2,5
-2,1,5
-2,3,5";
-  dbg!(compute(input));
-  panic!();
 }
