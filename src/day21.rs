@@ -67,24 +67,6 @@ impl Job {
       }
     }
   }
-  // fn humn_path(map: &HashMap<String, Job>) -> Vec<String> {
-  //   let mut path = vec!["humn".to_string()];
-  //   'outer: while path.last().unwrap().as_str() != "root" {
-  //     let last = path.last().unwrap();
-  //     for (k, j) in map.iter() {
-  //       match j {
-  //         Self::Yell(_) => {}
-  //         Self::Compute(l, r, _) => {
-  //           if l == last || r == last {
-  //             path.push(k.to_string());
-  //             continue 'outer;
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //   path
-  // }
 }
 
 impl FromStr for Job {
